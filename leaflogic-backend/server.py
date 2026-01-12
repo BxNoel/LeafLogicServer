@@ -22,6 +22,9 @@ class SimilarityRequest(BaseModel):
     a: str
     b: str
 
+class EmbeddingRequest(BaseModel):
+    text: str
+
 def dot(u, v):
     return sum(x * y for x, y in zip(u, v))
 
@@ -33,6 +36,7 @@ def hello():
 def health():
     return {"ok": True}
 
+# NOTE: This will make embeddings for TWO strings and return their cosine similarity
 @app.post("/similarity")
 def similarity(req: SimilarityRequest):
     emb = client.embeddings.create(
@@ -42,3 +46,14 @@ def similarity(req: SimilarityRequest):
     v1 = emb.data[0].embedding
     v2 = emb.data[1].embedding
     return {"similarity": dot(v1, v2)}
+
+# NOTE: This will make an embedding for ONE string
+@app.post("/embedding")
+def embedding(req: EmbeddingRequest):
+    emb = client.embeddings.create(
+        model="text-embedding-3-small",
+        input=req.text,
+    )
+    return {
+        "embedding": emb.data[0].embedding,
+    }
